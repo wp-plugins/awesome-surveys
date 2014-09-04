@@ -98,7 +98,8 @@ This plugin allows you to create surveys with an easy-to-use form builder, publi
 == Changelog ==
 
 = v1.4.2 =
-1. Added frontend check to ensure that JavaScript validation messages file exists before trying to load it (defaults to English) - Shout out to Kirk! Thanks for the report.
+1. Added frontend check to ensure that JavaScript validation messages file exists before trying to load it (defaults to English). 
+2. Shout out to Kirk! Thanks for the report.
 
 = v1.4.1 =
 1. bug fix
