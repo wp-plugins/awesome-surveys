@@ -3,7 +3,7 @@
 Plugin Name: Awesome Surveys
 Plugin URI: http://www.willthewebmechanic.com/awesome-surveys
 Description: Easily create surveys for your WordPress website and publish them with a simple shortcode
-Version: 1.6
+Version: 1.6.1
 Author: Will Brubaker
 Author URI: http://www.willthewebmechanic.com
 License: GPLv3.0
@@ -43,7 +43,7 @@ class Awesome_Surveys {
  static private $wwm_plugin_values = array(
   'name' => 'Awesome_Surveys',
   'dbversion' => '1.1',
-  'version' => '1.6',
+  'version' => '1.6.1',
   'supplementary' => array(
    'hire_me_html' => '<a href="http://www.willthewebmechanic.com">Hire Me</a>',
   )
@@ -499,6 +499,9 @@ class Awesome_Surveys {
   {
    foreach( $surveys['surveys'] as $survey_key => $survey )
    {
+    if ( empty( $survey ) ) {
+     continue;
+    }
     $form = json_decode( $survey['form'], true );
 
     // First, recreate the survey in the new array with the same key
@@ -1734,7 +1737,7 @@ class Awesome_Surveys {
   $surveys = get_option( 'wwm_awesome_surveys', array() );
   $survey = $surveys['surveys'][ $args[0] ];
 
-  if ( $surveys['enable_wwm_as_emails'] ) {
+  if ( isset( $surveys['enable_wwm_as_emails'] ) && $surveys['enable_wwm_as_emails'] ) {
    $subject = apply_filters( 'wwm_as_admin_email_subject', __( 'Survey Completed', $this->text_domain ) );
    $to = $surveys['mail_to'];
    $message = sprintf( __( 'A survey on your site named %s has been completed', $this->text_domain ), $survey['name'] );
@@ -1757,7 +1760,7 @@ class Awesome_Surveys {
    wp_mail( $to, $subject, $message );
   }
 
-  if ( $surveys['enable_wwm_as_respondent_email'] ) {
+  if ( isset( $surveys['enable_wwm_as_respondent_email'] ) && $surveys['enable_wwm_as_respondent_email'] ) {
    $form = json_decode( $survey['form'] );
    foreach ( $form as $key => $value ) {
     if ( 'Element_Email' == $value->type && is_email( $_POST['question'][$key] ) ) {
