@@ -192,7 +192,7 @@ class Awesome_Surveys_Frontend {
   }
   $num_responses = ( isset( $survey['num_responses'] ) ) ? absint( $survey['num_responses'] + 1 ) : 0;
   $survey['num_responses'] = $num_responses;
-  $form = json_decode( stripslashes( $survey['form'] ), true );
+  $form = json_decode( $survey['form'], true );
   $original_responses = $responses = $survey['responses'];
 
   foreach ( $responses as $key => $response ) {
