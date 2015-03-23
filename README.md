@@ -7,9 +7,9 @@
 
 **Requires at least:** 3.9.1
 
-**Tested up to:** 4.0.1
+**Tested up to:** 4.1.1
 
-**Stable tag:** 1.6.3
+**Stable tag:** 2.0
 
 **Tags:** survey, form builder, survey form, data collection, feedback, free, plugin, polls, questionaire, poll builder, opinion, customer satisfaction
 
@@ -18,6 +18,8 @@
 Create & publish feature-rich surveys with a few mouse clicks. All data collected remains in your control. Works better than healthcare.gov!
 
 ## Description ##
+
+Version 2.0 is a major rewrite to address the issues of data loss that some users have been experiencing. Surveys are now custom post types and leverage the WordPress post editor. Individual responses are stored as post meta - each response is represented by one row in the post meta table for the survey.
 
 This plugin allows you to create surveys with an easy-to-use form builder, publish surveys with a simple shortcode and view survey results in the admin backend. You maintain control of your data. Automatic form validation is included.
 
@@ -34,8 +36,16 @@ This plugin allows you to create surveys with an easy-to-use form builder, publi
 5. 	Publish your surveys on pages or posts by including a shortcode.
 6. 	Advanced form field validation is included.
 7. 	View results of your surveys in the admin area of your WordPress site.
-8. 	Contextual help available for many of the survey builder options
-9. 	Extendable through action/filter hooks.
+8. 	Extendable through action/filter hooks.
+
+## Known issues/limitations ##
+
+1. At this time, it is not possible to edit survey questions if the survey has responses. In the future I plan to re-implement this but only so much as to allow for the editing of text - You will not be able to add questions to a survey which has responses. You will not be able to add answers to questions if the survey has respones.
+
+2. On the "view results" screen all responses are output at once. This will likely have a negative impact in certain cases where the survey has a lot of responses - also a large number of responses is unwieldy to view.
+
+3. Since the surveys are now custom post types, the actual survey form is saved
+as 'post_content'. This means that if WordPress was in English when you built the survey, but your site wants to be in another language, the English strings will still be output, i.e. 'Submit Response' & 'make a selection...'. Likewise, even if your WordPress site was in your language but you didn't have the translations available, those strings will be output in English. As a workaround, you can append some parameters to your url e.g. when on the general survey options screen, your url would look like this: "wp-admin/admin.php?page=awesome-surveys.php" add this to the url: "&translate-surveys=true" to force translation of all of your surveys. The translation strings for your language must be present in order for this to work. As another alternative, I would suggest implementing the WordPress '`the_content`' filter to change the strings to whatever you need them to be.
 
 ## Installation ##
 
@@ -57,6 +67,7 @@ This plugin allows you to create surveys with an easy-to-use form builder, publi
 ### After Installation: ###
 
 * Once activated, your admin menu will have an item labeld "WtWM Plugins", that item has a submenu item called "Awesome Survyes", this is where you can configure build your surveys & view their results.
+
 * Rejoice in how amazingly easy it is to create and publish surveys.
 
 ## Frequently Asked Questions ##
@@ -68,24 +79,24 @@ This plugin allows you to create surveys with an easy-to-use form builder, publi
 
 ### How can I edit a survey? ###
 
-*	Under the 'Your Survey Results' tab, certain parts of your survey are editable. For instance you can click on the survey name or survey questions/answers. This will display a pop-up dialog box where you can edit the text in these fields.
+* Through the WordPress post editor for post type "awesome-surveys"
 
 ### How do I delete a survey? ###
 
-*	Each existing survey under the 'Your Survey Results' tab has a 'delete' button. Simply press this button, confirm your desired action and the survey will be nuked from the planet!
+* Surveys are custom post types and deleting is done the same way you delete a post of page
 
 
 ### How do I create a survey? ###
 
-* This can be done by using the powerful survey form builder located in the plugin configuration screen.
+* This can be done by using the powerful survey form builder in the post editor for post type awesome survey
 
 ### How do I publish a survey? ###
 
-* Surveys can be published in your blog posts or pages using a simple shortcode. After you have built a survey, its details are available in the plugin configuration screen under the 'Your Surveys' tab. The shortcode for each of your surveys is displayed there.
+* Navigate to WTWM Plugins -> New Survey and build your survey. Once done, press the publish button. You can also embed your surveys via a simple shortcode that is displayed in the survey builder
 
 ### Is there a howto video? ###
 
-*	Yes!
+* There was one for an earlier version - this is not current, but the functionality is similar.
 
 [![Awesome Surveys Howto Video](http://img.youtube.com/vi/YIta2rDE-QU/0.jpg)](http://www.youtube.com/watch?v=YIta2rDE-QU)
 
@@ -125,6 +136,13 @@ This plugin allows you to create surveys with an easy-to-use form builder, publi
 
 
 ## Changelog ##
+
+## v2.0 - Yemaya ##
+1. Major rewrite
+2. Surveys are now custom post types
+3. responses are each stored in post meta individually
+4. backward compatible to versions < 2.0, i.e. you can migrate older surveys to
+the new version and you old shortcodes will still work - authentication methods map back to the old survey ids
 
 ## v1.6.3 ##
 1. Attempts mitigation of data loss
