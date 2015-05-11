@@ -2,6 +2,7 @@
 /*
 todo:
 this belongs in a function - not here
+make the strings translatable the right way
  */
 global $post;
 $results = get_post_meta( $post->ID, '_response', false );
@@ -24,18 +25,44 @@ foreach ( $results as $response_key => $response_array ) {
 	}
 }
 
-_e( sprintf( '%sThis survey has received a total of %s responses%s', '<p>', count( $results ), '</p>' ), 'awesome-surveys' );
-foreach ( $response_counts as $question_key => $value ) {
-	echo '<div class="answers">';
-	if ( isset( $elements[ $question_key ]['value'] ) ) {
-		echo '<p class="answers">';
-		_e( sprintf( '%s received %s responses', $elements[ $question_key ]['name'], $value['totalcount'] ), 'awesome-surveys' );
-		echo '</p>';
-		foreach( $value['count'] as $answer_key => $count ) {
-			echo '<div class="options-container"><span class="options" style="width:' . number_format( ( $count / $value['totalcount'] ) * 100, 2 ).  '%;">' . $elements[ $question_key ]['label'][ $answer_key ] . '</span></div>';
+	echo '<p>';
+	printf( __( 'This survey has received a total of %s%d%s responses', 'awesome-surveys' ), count( $results ), '<b>', '</b>' );
+	echo '</p>';
+	foreach ( $response_counts as $question_key => $value ) {
+		echo '<div class="answers">';
+		if ( isset( $elements[ $question_key ]['value'] ) ) {
+			echo '<p class="answers">';
+			printf( __( '%s received %s%d%s responses', 'awesome-surveys' ), $elements[ $question_key ]['name'], $value['totalcount'], '<b>', '</b>' );
+			echo '</p>';
+			foreach( $value['count'] as $answer_key => $count ) {
+
+				$percentage = number_format( ( $count / $value['totalcount'] ) * 100, 2 );
+				$total_count = $value['totalcount'];
+
+				if ( 100 == intval( $percentage ) ) {
+					echo '<div class="options-container">'
+							.'<div class="options" style="width:' . $percentage . '%;">'
+								. $elements[ $question_key ]['label'][ $answer_key ] . ' (<b>' . $count . '</b>)'
+								. '<p class="percentage">' . $percentage . '% (' . $count . '/' . $total_count . ')</span>'
+							. '</div>'
+							. '<p>&nbsp;</p>'
+						. '</div>';
+				} else {
+					echo '<div class="options-container">'
+						.'<span class="options" style="width:' . $percentage . '%;">'
+							. $elements[ $question_key ]['label'][ $answer_key ] . ' (<b>' . $count . '</b>)'
+						. '</span>'
+						. '<p class="percentage">' . $percentage . '% (' . $count . '/' . $total_count . ')</p>'
+					. '</div>';
+				}
+			}
+		} else {
+			//future todo echo '<a href="#" data-question-key="' . $question_key . '">';
+			echo '<p class="totalcount survey">';
+			echo $elements[ $question_key ]['name'] . ' ';
+			printf( __( 'was answered %d times', 'awesome-surveys' ), $value['totalcount'] );
+			echo '</p>';
+		//future todo echo '</a>';
 		}
-	} else {
-		_e( sprintf( '<p class="totalcount survey">%s was answered %s times</p>', $elements[ $question_key ]['name'], $value['totalcount'] ), 'awesome-surveys' );
-	}
-	echo '<div class="clear"></div></div>';
+		echo '<div class="clear"></div></div>';
 }

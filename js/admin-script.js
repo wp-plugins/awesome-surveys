@@ -193,7 +193,7 @@ jQuery('document').ready(function($) {
 				e.preventDefault()
 				reset = confirm(commonL10n.warnDelete)
 				if (true == reset) {
-						$('#existing_elements').val('')
+						$('#existing_elements').val('').trigger('change')
 						$('#content').val('')
 						$('#form-preview-wrapper').hide()
 						$('#form-preview').empty()
@@ -217,6 +217,9 @@ jQuery('document').ready(function($) {
 						$('#content').val(data.data)
 				})
 		})
+		$('textarea, input[type="email"], input[type="number"], input[type="text"] ', '#form-preview-wrapper').on('keyup', function(){
+			$(this).val('')
+		})
 })
 
 function getPreview($) {
@@ -225,7 +228,7 @@ function getPreview($) {
 				$.post(ajaxurl, $('#awesome-survey :input').serializeArray(), function(data) {
 						$('#form-preview').empty().append(data.data[0])
 						$('#content').val(data.data[1])
-						$('#existing_elements').val(data.data[2])
+						$('#existing_elements').val(data.data[2]).trigger('change')
 						previewReady($)
 				})
 		}
@@ -261,10 +264,9 @@ function previewReady($) {
 						}
 				}
 		})
-		$('#form-preview input').each(function() {
-						if ('button' != $(this).attr('type')) {
-								$(this).prop('disabled', true)
-						}
+		$('textarea, input', '#form-preview-wrapper').each(function(){
+			$(this).prop('required', false);
+			$(this).removeClass('required');
 		})
 		$('#form-preview-wrapper').show()
 }

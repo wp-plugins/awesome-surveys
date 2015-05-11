@@ -127,6 +127,9 @@ class Awesome_Surveys_Ajax extends Awesome_Surveys {
 						}
 					}
 				}
+				if ( 'textarea' == $form_element ) {
+					$html .= '<label>' . __( 'Display number of characters remaining?', 'awesome-surveys' ) . '<br><input id="add-countdown" type="checkbox" name="options[add_countdown]"></label>';
+				}
 			$html .= '</div>';
 		}
 		$needs_options = array( 'radio', 'checkbox', 'dropdown' );
@@ -377,7 +380,7 @@ class Awesome_Surveys_Ajax extends Awesome_Surveys {
 			add_filter( $filter, array( $this, $filter ), $args[0], $args[1] );
 		}
 		if ( false === apply_filters( 'awesome_surveys_auth_method_' . $auth_method, $auth_args ) ) {
-			$data = array( apply_filters( 'wwm_survey_no_auth_message', sprintf( '<p>%s</p>', __( 'Your response to this survey has already been recorded. Thank you!', $this->text_domain ) ) ) );
+			$data = array( apply_filters( 'wwm_survey_no_auth_message', sprintf( '<p>%s</p>', __( 'Your response to this survey has already been recorded. Thank you!', 'awesome-surveys' ) ) ) );
 			wp_send_json_error( $data );
 		}
 

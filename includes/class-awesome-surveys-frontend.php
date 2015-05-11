@@ -20,6 +20,7 @@ class Awesome_Surveys_Frontend extends Awesome_Surveys {
 		add_filter( 'awesome_surveys_auth_method_none', '__return_true' );
 		$actions = array(
 			'wp_enqueue_scripts' => array( 'register_scripts', 10, 0 ),
+			'init' => array( 'init', 10, 0 ),
 			);
 		foreach ( $actions as $action => $args ) {
 			add_action( $action, array( $this, $args[0] ), $args[1], $args[2] );
@@ -85,7 +86,7 @@ class Awesome_Surveys_Frontend extends Awesome_Surveys {
 			* @see awesome_surveys_auth_method_login() which adds a filter if the user is not logged in
 			* @see not_logged_in_message() which is the filter used to customize the message if the user is not logged in.
 			*/
-			return apply_filters( 'wwm_survey_no_auth_message', sprintf( '<p>%s</p>', __( 'Your response to this survey has already been recorded. Thank you!', $this->text_domain ) ) );
+			return apply_filters( 'wwm_survey_no_auth_message', sprintf( '<p>%s</p>', __( 'Your response to this survey has already been recorded. Thank you!', 'awesome-surveys' ) ) );
 		}
 		$nonce = wp_create_nonce( 'answer-survey' );
 		$survey_form = sprintf( '<%1$s %3$s>%2$s</%1$s>', apply_filters( 'wwm_survey_title_tag', 'h4' ), $survey->post_title, apply_filters( 'wwm_survey_title_atts', '' ) ) . str_replace( 'value="answer_survey_nonce"', 'value="' . $nonce . '"', $survey->post_content );
@@ -107,7 +108,7 @@ class Awesome_Surveys_Frontend extends Awesome_Surveys {
 		wp_register_script( 'jquery-validation-plugin', WWM_AWESOME_SURVEYS_URL . '/js/jquery.validate.min.js', array( 'jquery' ), '1.13.1' );
 		wp_register_script( 'awesome-surveys-frontend', WWM_AWESOME_SURVEYS_URL .'/js/script' . $suffix . '.js', array( 'jquery', 'jquery-validation-plugin' ), $this->plugin_version, true );
 		wp_register_style( 'awesome-surveys-frontend-styles', WWM_AWESOME_SURVEYS_URL . '/css/style' . $suffix . '.css', array( 'normalize-css', 'pure-forms-css' ), $this->plugin_version, 'all' );
-		wp_localize_script( 'awesome-surveys-frontend', 'wwm_awesome_surveys', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ), ) );
+		wp_localize_script( 'awesome-surveys-frontend', 'wwm_awesome_surveys', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ), 'countDownMessage' => apply_filters( 'wwm_as_countdown_message', __( 'Characters remaining', 'awesome-surveys' ) ) ) );
 		if ( is_singular( 'awesome-surveys' ) ) {
 			$options = get_option( 'wwm_awesome_surveys_options', array() );
 			$include_css = ( isset( $options['general_options']['include_css'] ) ) ? absint( $options['general_options']['include_css'] ) : 1;
@@ -129,7 +130,7 @@ class Awesome_Surveys_Frontend extends Awesome_Surveys {
 		*/
 	public function not_logged_in_message( $message ) {
 
-		return sprintf( '<p>%s</p>', __( 'You must be logged in to participate in this survey', $this->text_domain ) );
+		return sprintf( '<p>%s</p>', __( 'You must be logged in to participate in this survey', 'awesome-surveys' ) );
 	}
 
 	/**

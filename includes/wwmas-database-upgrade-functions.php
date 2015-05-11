@@ -226,6 +226,7 @@ function wwmas_translate_post_content() {
 	$query_args = array(
 		'post_type' => 'awesome-surveys',
 		'post_status' => 'publish',
+		'posts_per_page' => -1,
 		);
 	$surveys = new WP_Query( $query_args );
 	if ( $surveys->have_posts() ) {
@@ -238,10 +239,10 @@ function wwmas_translate_post_content() {
 			$elements = wwmas_convert_elements( json_decode( get_post_meta( $survey_id, 'existing_elements', true ), true ) );
 			$content = wwmas_post_content_generator( $args, $elements );
 			$postarr = array(
-		'ID' => $survey_id,
-		'post_content' => $content,
-		);
-		wp_update_post( $postarr );
+				'ID' => $survey_id,
+				'post_content' => $content,
+				);
+			wp_update_post( $postarr );
 		}
 	}
 }

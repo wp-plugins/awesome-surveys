@@ -3,6 +3,7 @@
 class Awesome_Surveys_Admin extends Awesome_Surveys {
 
 	protected $page_hook, $page_title, $menu_title, $menu_slug;
+	public static $options;
 	public function __construct() {
 		parent::__construct();
 		$this->page_title = __( 'Awesome Surveys Options', 'awesome-surveys' );
@@ -10,11 +11,12 @@ class Awesome_Surveys_Admin extends Awesome_Surveys {
 		$this->menu_slug = 'awesome-surveys.php';
 		$this->menu_link_text = __( 'Awesome Surveys', 'awesome-surveys' );
 		$this->text_domain = 'awesome-surveys';
+		self::$options = $this->get_options();
 		$actions = array(
 			'admin_menu' => array( 'admin_menu', 10, 0 ),
 			'save_post' => array( 'save_post', 10, 2 ),
 			'admin_enqueue_scripts' => array( 'admin_enqueue_scripts', 10, 0 ),
-			'admin_init' => array( 'init', 10, 0 ),
+			'init' => array( 'init', 10, 0 ),
 			'admin_init' => array( 'admin_init', 1, 0 ),
 			'admin_notices' => array( 'admin_notices', 10, 0 ),
 			'wp_insert_post_data' => array( 'insert_post_data', 10, 2 ),
@@ -34,6 +36,7 @@ class Awesome_Surveys_Admin extends Awesome_Surveys {
 		foreach ( $filters as $key => $filter ) {
 			add_filter( $key, array( $this, $filter[0] ), $filter[1], $filter[2] );
 		}
+		$awesome_surveys_admin = $this;
 	}
 
 	public function save_post( $post_id, $post ) {
@@ -42,6 +45,7 @@ class Awesome_Surveys_Admin extends Awesome_Surveys {
 		}
 		if ( isset( $_POST['existing_elements'] ) ) {
 			$existing_elements = $_POST['existing_elements'];
+			$this->existing_elements = $existing_elements;
 			update_post_meta( $post_id, 'existing_elements', $existing_elements );
 		}
 		if ( isset( $_POST['meta']['survey_auth_method'] ) ) {
@@ -194,7 +198,7 @@ class Awesome_Surveys_Admin extends Awesome_Surveys {
 	}
 
 	/**
-	 * conditinally outputsa 'view results' link in the
+	 * conditinally outputs a 'view results' link in the
 	 * 'all posts' screen
 	 * @param  array $actions
 	 * @param  oject $post    the wp post object
@@ -286,10 +290,187 @@ class Awesome_Surveys_Admin extends Awesome_Surveys {
 			);
 		$new_survey = wp_insert_post( $new_post_data );
 		if ( $new_survey ) {
-			foreach( $post_metas as $meta_key )
+			foreach( $post_metas as $meta_key ) {
 				$meta_value = get_post_meta( $post_id, $meta_key, true );
 				update_post_meta( $new_survey, $meta_key, $meta_value );
+			}
 		}
 		return $new_survey;
+	}
+
+	/**
+	 * outputs pagination links on the results screen
+	 *
+	 */
+	public function results_pagination_links() {
+		$post_id = absint( $_GET['post'] );
+		$num_results = count( get_post_meta( $post_id, '_response', false ) );
+		$limit = ( isset( $_GET['results'] ) ) ? intval( $_GET['results'] ) : 10;
+		$offset = 0;
+		$cur_page_num = ( isset( $_GET['offset'] ) ) ? intval( $_GET['offset'] ) : 0;
+		if ( $num_results > $limit ) {
+			$num_pages = ceil( $num_results / $limit );
+			for ( $iterations = 0; $iterations < $num_pages; $iterations++ ) {
+				if ( 0 == $iterations ) {
+					if ( $cur_page_num > ( ( $iterations + 1 ) * $limit ) ) {
+						echo '&nbsp;<a href="post.php?post=' . $post_id . '&action=edit&view=results&results=' . $limit . '&offset=0">&nbsp;&laquo;&nbsp;</a>&nbsp;';
+					}
+					if ( $cur_page_num > 0 ) {
+						echo '&nbsp;<a href="post.php?post=' . $post_id . '&action=edit&view=results&results=' . $limit . '&offset=' . ( $cur_page_num - $limit ) . '">&nbsp;&lsaquo;&nbsp;</a>&nbsp;';
+					}
+
+				}
+				echo '&nbsp;';
+				if ( $offset != $cur_page_num ) {
+						echo '<a href="post.php?post=' . $post_id . '&action=edit&view=results&results=' . $limit . '&offset=' . $offset . '">';
+					}
+					echo ( $iterations + 1 ) . '&nbsp;';
+					if ( $offset != $cur_page_num ) {
+						echo '</a>';
+					}
+					if ( $iterations == $num_pages - 1 ) {
+						if ( $cur_page_num < ( ( $num_pages - 1 ) * $limit ) ) {
+							echo '&nbsp;<a href="post.php?post=' . $post_id . '&action=edit&view=results&results=' . $limit . '&offset=' . ( $cur_page_num + $limit ) . '">&nbsp;&rsaquo;&nbsp;</a>&nbsp;';
+						}
+						if ( $cur_page_num < ( ( $num_pages - 2 ) * $limit ) ) {
+							echo '&nbsp;<a href="post.php?post=' . $post_id . '&action=edit&view=results&results=' . $limit . '&offset=' . ( ( $num_pages - 1 ) * $limit ) . '">&nbsp;&raquo;&nbsp;</a>';
+						}
+					}
+				$offset += $limit;
+			}
+		}
+	}
+
+		/**
+	 * outputs appropriate content for each of the screens
+	 *
+	 */
+	public function survey_editor() {
+		if ( isset( $_GET['view'] ) && 'results' === $_GET['view'] ) {
+			$post_id = absint( $_GET['post'] );
+			add_action( 'edit_form_after_title', array( $this, 'results_pagination_links' ) );
+			add_action( 'edit_form_advanced', array( $this, 'results_pagination_links' ) );
+			$auth_method = get_post_meta( $post_id, 'survey_auth_method', true );
+			$auth_type = $this->auth_methods[ $auth_method ]['name'];
+			remove_post_type_support( 'awesome-surveys', 'title' );
+			remove_meta_box( 'submitdiv', 'awesome-surveys', 'side' );
+			add_meta_box( 'survey-results', __( 'Survey Results For:', 'awesome-surveys' ) . ' ' . get_the_title( $post_id ), array( $this, 'survey_results' ), 'awesome-surveys', 'normal', 'core' );
+			$results = $this->get_results( $post_id );
+			$offset = ( isset( $_GET['offset'] ) ) ? absint( $_GET['offset'] ) : 0;
+			$results_keys = array();
+			foreach ( $results as $key => $value ) {
+				$results_keys[] = array_keys( $value );
+			}
+			$elements = json_decode( get_post_meta( $post_id, 'existing_elements', true ), true );
+			foreach ( $results as $respondent_key => $answers ) {
+				$auth_method = get_post_meta( $post_id, 'survey_auth_method', true );
+				$auth_type = $this->auth_methods[ $auth_method ]['name'];
+				if ( 'login' == $auth_type ) {
+					$user_data = get_userdata( $results_keys[ $respondent_key ][0] );
+					$meta_box_title = __( 'Results for ', 'awesome-surveys' ) . $user_data->display_name;
+				} else {
+					$meta_box_title = __( 'Results for respondent ', 'awesome-surveys' ) . ( $respondent_key + 1 + $offset );
+					$number = ( isset( $_GET['offset'] ) ) ? absint( $_GET['offset'] ) : 0;
+				}
+				add_filter( 'postbox_classes_awesome-surveys_respondent-' . ( $respondent_key + 1 ), array( $this, 'postbox_class' ) );
+				add_meta_box( 'respondent-' . $respondent_key, $meta_box_title, array( $this, 'answers_by_respondent' ), 'awesome-surveys', 'normal', 'core', array( $results, $elements, $respondent_key ) );
+			}
+		} else {
+			add_meta_box( 'create_survey', __( 'Create Survey', 'awesome-surveys' ), array( $this, 'survey_builder' ), 'awesome-surveys', 'normal', 'core' );
+			add_meta_box( 'general-survey-options-metabox', __( 'General Survey Options', 'awesome-surveys' ), array( $this, 'general_survey_options' ), 'awesome-surveys', 'normal', 'core' );
+		}
+	}
+
+
+	private function get_results( $post_id ) {
+		global $wpdb;
+		$screen = get_current_screen();
+		$limit = ( isset( $_GET['results'] ) ) ? intval( $_GET['results'] ) : 10;
+		$offset = ( isset( $_GET['offset'] ) ) ? intval( $_GET['offset'] ) : 0;
+		$my_query = $wpdb->prepare( "SELECT `meta_value` FROM `" . $wpdb->postmeta . "` WHERE `post_id` = %d AND `meta_key` = '_response'  ORDER BY `meta_id` ASC LIMIT %d OFFSET %d", $post_id, $limit, $offset );
+		$responses = $wpdb->get_results( $my_query );
+		$return = array();
+		foreach ( $responses as $response ) {
+			$answers = unserialize( $response->meta_value );
+			$return[] = $answers;
+ 		}
+		return $return;
+	}
+
+		/**
+	 * populates the meta boxes with individual survey respondents
+	 * @param  object $post the wp $post object
+	 * @param  array  $args questions and answers
+	 */
+	public function answers_by_respondent( $post, $args = array() ) {
+		$questions = $args['args'][1];
+		$answers = reset( $args['args'][0][ $args['args'][2] ] );
+		foreach ( $questions as $key => $question ) {
+			$response = null;
+			$has_options = array( 'dropdown', 'radio', 'checkbox' );
+			$label = $question['name'];
+			if ( in_array( $question['type'], $has_options ) ) {
+				if ( isset( $answers[ $key ] ) && is_array( $answers[ $key ] ) ) {
+					$response = '<ul class="answers">' . __( 'Answers', 'awesome-surveys' ) . "\n";
+					foreach ( $answers[ $key ] as $answer_key => $answer_value ) {
+						$response .= '<li>' . $question['label'][ $answer_value ] . '</li>' . "\n";
+					}
+					$response .= '</ul>' . "\n";
+				} else {
+					$response = ( isset( $answers[ $key ] ) && isset( $question['label'][ $answers[ $key ] ] ) ) ? '<span class="answer">' . __( 'Answer', 'awesome-surveys' ) . ': ' . $question['label'][ $answers[ $key ] ] . '</span>' : null;
+				}
+			} else {
+				$response = ( isset( $answers[ $key ] ) && ! empty( $answers[ $key ] ) ) ? '<span class="answer">' . __( 'Answer', 'awesome-surveys' ) . ': ' . $answers[ $key ] . '</span>' : null;
+			}
+			$response = ( ! is_null( $response ) ) ? $response : '<span class="answer italics">' . __( 'No response given', 'awesome-surveys' ) . '</span>';
+			echo '<p><span class="italics">' . __( 'Question', 'awesome-surveys' ). ': ' . $label . '</span><br>' . $response . "</p>\n";
+		}
+	}
+
+	/**
+	 * loads scripts and html for the survey builder
+	 */
+	public function survey_builder() {
+		wp_enqueue_script( 'awesome-surveys-admin-script' );
+		wp_enqueue_style( 'awesome-surveys-admin-style' );
+		include_once( 'views/html-survey-builder.php' );
+	}
+
+	/**
+	 * gets the html for the options form
+	 */
+	public function general_survey_options() {
+		include_once( 'views/html-survey-options-general.php' );
+	}
+
+	public function survey_results() {
+		include_once( 'views/html-survey-results.php' );
+	}
+
+	/**
+	* adds the closed class to all survey responses postboxes
+	* @param  array $classes the array to filter
+	* @return array          the filtered array
+	*/
+	public function postbox_class( $classes ) {
+		if ( ! in_array( 'closed', $classes ) ) {
+			$classes[] = 'closed';
+		}
+		return $classes;
+	}
+
+		private function get_options() {
+			return array(
+			'general_options' => array(
+				'include_css' => 1,
+				),
+			'email_options' => array(
+				'enable_emails' => 0,
+				'enable_respondent_email' => 0,
+				'email_subject' => __( 'Thank you for your response', 'awesome-surveys' ),
+				'mail_to' => get_option( 'admin_email', '' ),
+				'respondent_email_message' => __( 'Thank you for your response to a survey', 'awesome-surveys' ),
+				)
+			);
 	}
 }
