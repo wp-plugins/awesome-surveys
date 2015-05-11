@@ -2,8 +2,8 @@
 Contributors: WilltheWebMechanic, tobyhawkins, tofuSCHNITZEL
 License: GPLv3.0+
 Requires at least: 3.9.1
-Tested up to: 4.1.1
-Stable tag: 2.0.2
+Tested up to: 4.2.2
+Stable tag: 2.0.3
 Tags: survey, form builder, survey form, data collection, feedback, free, plugin, polls, questionaire, poll builder, opinion, customer satisfaction
 Donate Link: http://www.willthewebmechanic.com/awesome-surveys/
 
