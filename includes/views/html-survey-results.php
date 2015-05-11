@@ -32,7 +32,7 @@ foreach ( $results as $response_key => $response_array ) {
 		echo '<div class="answers">';
 		if ( isset( $elements[ $question_key ]['value'] ) ) {
 			echo '<p class="answers">';
-			printf( __( '%s received %s%d%s responses', 'awesome-surveys' ), $elements[ $question_key ]['name'], $value['totalcount'], '<b>', '</b>' );
+			printf( __( '%s received %s%d%s responses', 'awesome-surveys' ), $elements[ $question_key ]['name'], '<b>', $value['totalcount'], '</b>' );
 			echo '</p>';
 			foreach( $value['count'] as $answer_key => $count ) {
 
