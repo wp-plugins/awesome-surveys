@@ -26,7 +26,7 @@ foreach ( $results as $response_key => $response_array ) {
 }
 
 	echo '<p>';
-	printf( __( 'This survey has received a total of %s%d%s responses', 'awesome-surveys' ), count( $results ), '<b>', '</b>' );
+	printf( __( 'This survey has received a total of %s%d%s responses', 'awesome-surveys' ), '<b>', count( $results ), '</b>' );
 	echo '</p>';
 	foreach ( $response_counts as $question_key => $value ) {
 		echo '<div class="answers">';
