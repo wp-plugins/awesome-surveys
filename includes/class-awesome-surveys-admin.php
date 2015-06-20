@@ -46,7 +46,9 @@ class Awesome_Surveys_Admin extends Awesome_Surveys {
 		if ( isset( $_POST['existing_elements'] ) ) {
 			$existing_elements = $_POST['existing_elements'];
 			$this->existing_elements = $existing_elements;
-			update_post_meta( $post_id, 'existing_elements', $existing_elements );
+			if ( json_decode( stripslashes( $existing_elements ) ) ) {
+				update_post_meta( $post_id, 'existing_elements', $existing_elements );
+			}
 		}
 		if ( isset( $_POST['meta']['survey_auth_method'] ) ) {
 			update_post_meta( $post_id, 'survey_auth_method', absint( $_POST['meta']['survey_auth_method'] ) );
@@ -112,7 +114,7 @@ class Awesome_Surveys_Admin extends Awesome_Surveys {
 		$plugin_panel_version = 2;
 		add_filter( 'wwm_plugin_links', array( $this, 'this_plugin_link' ) );
 		if ( empty( $_wwm_plugins_page ) || ( is_array( $_wwm_plugins_page ) && $plugin_panel_version > $_wwm_plugins_page[1] ) ) {
-			$_wwm_plugins_page[0] = add_menu_page( 'WtWM Plugins', 'WtWM Plugins', 'edit_others_posts', 'wwm_plugins', array( $this, 'wwm_plugin_links' ), WWM_AWESOME_SURVEYS_URL . '/images/wwm_wp_menu.png', '90' );
+			$_wwm_plugins_page[0] = add_menu_page( 'WtWM Plugins', 'WtWM Plugins', 'edit_others_posts', 'wwm_plugins', array( $this, 'wwm_plugin_links' ), WWM_AWESOME_SURVEYS_URL . '/images/wwm_wp_menu.png', '90.314' );
 			$_wwm_plugins_page[1] = $plugin_panel_version;
 		}
 		$this->page_hook = add_submenu_page( 'wwm_plugins', $this->page_title, $this->menu_title, 'edit_others_posts', $this->menu_slug, array( &$this, 'plugin_options' ) );
