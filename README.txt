@@ -3,7 +3,7 @@ Contributors: WilltheWebMechanic, tobyhawkins, tofuSCHNITZEL
 License: GPLv3.0+
 Requires at least: 3.9.1
 Tested up to: 4.2.2
-Stable tag: 2.0.5
+Stable tag: 2.0.6
 Tags: survey, form builder, survey form, data collection, feedback, free, plugin, polls, questionaire, poll builder, opinion, customer satisfaction
 Donate Link: http://www.willthewebmechanic.com/awesome-surveys/
 
@@ -107,6 +107,10 @@ as 'post_content'. This means that if WordPress was in English when you built th
 
 
 == Changelog ==
+= v2.0.6 =
+1. implement/change escaping function used when echoing values into survey builder form
+2. fire the auth method update action prior to the 'responses saved' action
+
 = v2.0.5 =
 1. Don't process survey response if survey is not published
 2. Don't save post meta "existing_elements" if json_decode of same fails
